@@ -39,9 +39,20 @@
     // Using the fs Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
     // It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt
     // Edit the text in random.txt to test out the feature for movie-this and concert-this.
-
-var keys = require("./keys.js");
+console.log(process.argv);
+//Grab what action the user wants to do
+// var action = process.argv[2];
 
 require("dotenv").config();
 
+var keys = require("./keys.js");
+
 var spotify = new Spotify(keys.spotify);
+
+spotify.search({ type: 'track', query: 'All the Small Things' }, function(err, data) {
+    if (err) {
+      return console.log('Error occurred: ' + err);
+    }
+   
+  console.log(data); 
+  });
