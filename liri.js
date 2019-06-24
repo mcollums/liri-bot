@@ -48,20 +48,25 @@ require("dotenv").config();
 var keys = require("./keys.js");
 var chalk = require("chalk");
 var axios = require("axios");
+var Spotify = require('node-spotify-api');
+var spotify = new Spotify(keys.spotify);
 
+var action = process.argv[2];
+var keywordInitial = process.argv[3].slice(0);
+var keyword = keywordInitial.split(' ').join('+');
 
 function getOMDB() {
-    movieName = "The Grand Budapest Hotel";
+    var movieName = "Princess Mononoke";
+    if( keyword ) {
+        movieName = keyword;
+    }
+    
     queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=eb91f19f";
 
     axios.get(queryURL).then(
         function (response) {
-            var omdbObject = JSON.stringify(response.data);
+            // var omdbObject = JSON.stringify(response.data);
             var obj = response.data;
-
-            // console.log(chalk.green(omdbObject));
-            // console.log(chalk.magenta(JSON.stringify(obj.Ratings)));
-            // console.log(chalk.magenta(JSON.stringify(obj.Ratings[1].Value)));
 
             console.log(chalk.blue("Movie Title: " + obj.Title));
             console.log(chalk.blue("Release Year: " + obj.Year));
@@ -95,18 +100,20 @@ function getOMDB() {
         })
 }
 
-// getOMDB();
 
 function getBIT() {
-    artist = "The Killers";
-    queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
+    var artist = "The Strokes";
+    if (keyword) {
+        artist = keyword;
+    }
+
+    var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
     axios.get(queryURL).then(
         function (response) {
             var obj = response.data;
             var count = 1;
             console.log(chalk.green("Results for " + artist + " shows \n"));
-
 
             obj.forEach(function (event) {
                 console.log(chalk.green("Result #" + count));
@@ -141,36 +148,53 @@ function getBIT() {
 }
 
 
-// getBIT();
-
-var Spotify = require('node-spotify-api');
-var spotify = new Spotify(keys.spotify);
 
 function getSpotify() {
-    spotify.search({ type: 'track', query: 'I Write Sins Not Tragedies' })
+    var song = "Ace of Base";
+    if (keyword) {
+        song = keyword;
+    }
+
+    spotify.search({ type: 'track', query: song })
         .then(function (response) {
             //   console.log(response.tracks);
             console.log(response.tracks.items);
             var obj = response.tracks.items;
-            count = 1;
+            count = 0;
+            spotifyCount = 1;
 
             obj.forEach(function (result) {
-                console.log(chalk.magenta("Result #" + count));
-                console.log(chalk.magenta("Artist Name: " + JSON.stringify(result.artists)));
-                console.log(chalk.magenta("Artist Name: " + JSON.stringify(result.artists["Artist Name"])));
-                // console.log(chalk.magenta("Song: " + (result.name)));
-                // console.log(chalk.magenta("Album: " + (result.album.name)));
-                // console.log(chalk.magenta("Preview: " + (result.preview_url) + "\n"));
-
-
-                count++;
+                if (spotifyCount <= 5) {
+                    console.log(chalk.magenta("Result #" + spotifyCount));
+                    console.log(chalk.magenta("Artist Name: " + (result.artists[0].name)));
+                    console.log(chalk.magenta("Song: " + (result.name)));
+                    console.log(chalk.magenta("Album: " + (result.album.name)));
+                    console.log(chalk.magenta("Preview: " + (result.preview_url) + "\n"));
+                    count++;
+                }
+                spotifyCount++;
             })
-
-
         })
         .catch(function (err) {
             console.log(err);
         });
 }
 
-getSpotify();
+
+
+switch (action) {
+    case "concert-this":
+        getBIT();
+        break;
+    case "spotify-this-song":
+        getSpotify();
+        break;
+    case "movie-this":
+        getOMDB();
+        break;
+    case "do-what-it-says":
+        getOMDB();
+        break;
+    default:
+        console.log("Sorry, that's not a LIRI command. Please select: movie-this, spotify-this-song, do-what-it-says or concert-this followed by a keyword.");
+}
