@@ -106,9 +106,9 @@ function getBIT() {
             var obj = response.data;
             var count = 1;
             console.log(chalk.green("Results for " + artist + " shows \n"));
-            
 
-            obj.forEach (function (event) {
+
+            obj.forEach(function (event) {
                 console.log(chalk.green("Result #" + count));
                 console.log(chalk.green("Venue Name: " + event.venue.name));
                 console.log(chalk.green("Venue Location: " + event.venue.city + "," + event.venue.country));
@@ -143,17 +143,34 @@ function getBIT() {
 
 // getBIT();
 
-var Spotify = require ('node-spotify-api');
+var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 
 function getSpotify() {
-    spotify.search({ type: 'track', query: 'Hurt' })
-    .then(function(response) {
-      console.log(response);
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
+    spotify.search({ type: 'track', query: 'I Write Sins Not Tragedies' })
+        .then(function (response) {
+            //   console.log(response.tracks);
+            console.log(response.tracks.items);
+            var obj = response.tracks.items;
+            count = 1;
+
+            obj.forEach(function (result) {
+                console.log(chalk.magenta("Result #" + count));
+                console.log(chalk.magenta("Artist Name: " + JSON.stringify(result.artists)));
+                console.log(chalk.magenta("Artist Name: " + JSON.stringify(result.artists["Artist Name"])));
+                // console.log(chalk.magenta("Song: " + (result.name)));
+                // console.log(chalk.magenta("Album: " + (result.album.name)));
+                // console.log(chalk.magenta("Preview: " + (result.preview_url) + "\n"));
+
+
+                count++;
+            })
+
+
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
 }
 
 getSpotify();
