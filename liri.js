@@ -40,10 +40,6 @@
 // It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt
 // Edit the text in random.txt to test out the feature for movie-this and concert-this.
 
-
-//Grab what action the user wants to do
-// var action = process.argv[2];
-
 require("dotenv").config();
 var keys = require("./keys.js");
 var chalk = require("chalk");
@@ -52,14 +48,14 @@ var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 
 var action = process.argv[2];
-var keywordInitial = process.argv[3].slice(0);
-var keyword = keywordInitial.split(' ').join('+');
+var keyword = process.argv.slice(3).join(" ");
 
 function getOMDB() {
     var movieName = "Princess Mononoke";
     if( keyword ) {
         movieName = keyword;
     }
+    console.log(keyword);
     
     queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=eb91f19f";
 
@@ -106,6 +102,7 @@ function getBIT() {
     if (keyword) {
         artist = keyword;
     }
+    console.log(keyword);
 
     var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
@@ -154,11 +151,12 @@ function getSpotify() {
     if (keyword) {
         song = keyword;
     }
+    console.log(keyword);
 
     spotify.search({ type: 'track', query: song })
         .then(function (response) {
             //   console.log(response.tracks);
-            console.log(response.tracks.items);
+            // console.log(response.tracks.items);
             var obj = response.tracks.items;
             count = 0;
             spotifyCount = 1;
