@@ -45,6 +45,7 @@ var keys = require("./keys.js");
 var fs = require("fs");
 var chalk = require("chalk");
 var axios = require("axios");
+var moment = require("moment");
 var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 
@@ -56,8 +57,10 @@ function getOMDB() {
     var movieName = "Princess Mononoke";
     if (keyword) {
         movieName = keyword;
+        console.log(chalk.blue("\nResults for movies titled: " + movieName + "\n"));
+    } else {
+        console.log(chalk.blue("You didn't enter a movie, so here are results for 'Princess Mononoke'."));
     }
-    console.log(keyword);
 
     queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=eb91f19f";
 
@@ -66,16 +69,21 @@ function getOMDB() {
             // var omdbObject = JSON.stringify(response.data);
             var obj = response.data;
 
-            console.log(chalk.blue("Movie Title: " + obj.Title));
-            console.log(chalk.blue("Release Year: " + obj.Year));
-            console.log(chalk.blue("IMDB Rating: " + obj.imdbRating));
-            console.log(chalk.blue("Rotten Tomatoes Rating: " + (obj.Ratings[1].Value)));
-            console.log(chalk.blue("Country: " + obj.Country));
-            console.log(chalk.blue("Languages: " + obj.Language));
-            console.log(chalk.blue("Plot: " + obj.Plot));
-            console.log(chalk.blue("Actors: " + obj.Actors));
+            if (obj.length === undefined) {
+                console.log(chalk.blue("Sorry, there are no results for " + movieName + " :-(\n"));
+            } else {
+                console.log(chalk.blue("Movie Title: " + obj.Title));
+                console.log(chalk.blue("Release Year: " + obj.Year));
+                console.log(chalk.blue("IMDB Rating: " + obj.imdbRating));
+                console.log(chalk.blue("Rotten Tomatoes Rating: " + (obj.Ratings[1].Value)));
+                console.log(chalk.blue("Country: " + obj.Country));
+                console.log(chalk.blue("Languages: " + obj.Language));
+                console.log(chalk.blue("Plot: " + obj.Plot));
+                console.log(chalk.blue("Actors: " + obj.Actors));
+            }
 
         })
+
         .catch(function (error) {
             if (error.response) {
                 // The request was made and the server responded with a status code
@@ -125,7 +133,8 @@ function getBIT() {
                         console.log(chalk.green("Result #" + count));
                         console.log(chalk.green("Venue Name: " + event.venue.name));
                         console.log(chalk.green("Venue Location: " + event.venue.city + "," + event.venue.country));
-                        console.log(chalk.green("Show Date: " + event.datetime + "\n"));
+                        var date = moment(event.datetime).format("L");
+                        console.log(chalk.green("Show Date: " + date + "\n"));
                         count++;
                     }
                     bitCount++;
@@ -163,7 +172,7 @@ function getSpotify() {
 
     if (keyword) {
         song = keyword;
-        console.log(chalk.magenta("Spotify results for " + song + "."));
+        console.log(chalk.magenta("Spotify results for " + song + ".\n"));
     } else {
         console.log(chalk.magenta("You didn't enter a song, so here are Spotify results for 'Enjoy the Silence'."));
     }
@@ -174,17 +183,21 @@ function getSpotify() {
             count = 0;
             spotifyCount = 1;
 
-            obj.forEach(function (result) {
-                if (spotifyCount <= 3) {
-                    console.log(chalk.magenta("Result #" + spotifyCount));
-                    console.log(chalk.magenta("Artist Name: " + (result.artists[0].name)));
-                    console.log(chalk.magenta("Song: " + (result.name)));
-                    console.log(chalk.magenta("Album: " + (result.album.name)));
-                    console.log(chalk.magenta("Preview: " + (result.preview_url) + "\n"));
-                    count++;
-                }
-                spotifyCount++;
-            })
+            if (obj.length === 0) {
+                console.log(chalk.magenta("Sorry, there are no results for " + song + " :-(\n"));
+            } else {
+                obj.forEach(function (result) {
+                    if (spotifyCount <= 3) {
+                        console.log(chalk.magenta("Result #" + spotifyCount));
+                        console.log(chalk.magenta("Artist Name: " + (result.artists[0].name)));
+                        console.log(chalk.magenta("Song: " + (result.name)));
+                        console.log(chalk.magenta("Album: " + (result.album.name)));
+                        console.log(chalk.magenta("Preview: " + (result.preview_url) + "\n"));
+                        count++;
+                    }
+                    spotifyCount++;
+                })
+            }
         })
         .catch(function (err) {
             console.log(err);
