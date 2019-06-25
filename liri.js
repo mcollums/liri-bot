@@ -7,11 +7,11 @@
 // Do not overwrite your file each time you run a command.
 
 // concert-this
-// This will search the Bands in Town Artist Events API("https://rest.bandsintown.com/artists/" + 
+// - This will search the Bands in Town Artist Events API("https://rest.bandsintown.com/artists/" + 
 // artist + "/events?app_id=codingbootcamp") for an artist and render the following information about each event to the terminal:
-// Name of the venue
-// Venue location
-// Date of the Event(use moment to format this as "MM/DD/YYYY")
+// - Name of the venue
+// - Venue location
+// + Date of the Event(use moment to format this as "MM/DD/YYYY")
 
 // spotify-this-song
 // This will show the following information about the song in your terminal/bash window
@@ -42,6 +42,7 @@
 
 require("dotenv").config();
 var keys = require("./keys.js");
+var fs = require("fs");
 var chalk = require("chalk");
 var axios = require("axios");
 var Spotify = require('node-spotify-api');
@@ -49,14 +50,15 @@ var spotify = new Spotify(keys.spotify);
 
 var action = process.argv[2];
 var keyword = process.argv.slice(3).join(" ");
+runSwitch();
 
 function getOMDB() {
     var movieName = "Princess Mononoke";
-    if( keyword ) {
+    if (keyword) {
         movieName = keyword;
     }
     console.log(keyword);
-    
+
     queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=eb91f19f";
 
     axios.get(queryURL).then(
@@ -99,10 +101,13 @@ function getOMDB() {
 
 function getBIT() {
     var artist = "The Strokes";
+
     if (keyword) {
         artist = keyword;
+        console.log(chalk.green("\nResults for " + artist + " shows: \n"));
+    } else {
+        console.log(chalk.green("You didn't enter a song, so here are results from Bands In Town for 'The Strokes'."));
     }
-    console.log(keyword);
 
     var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
@@ -110,15 +115,22 @@ function getBIT() {
         function (response) {
             var obj = response.data;
             var count = 1;
-            console.log(chalk.green("Results for " + artist + " shows \n"));
+            var bitCount = 0;
 
-            obj.forEach(function (event) {
-                console.log(chalk.green("Result #" + count));
-                console.log(chalk.green("Venue Name: " + event.venue.name));
-                console.log(chalk.green("Venue Location: " + event.venue.city + "," + event.venue.country));
-                console.log(chalk.green("Show Date: " + event.datetime + "\n"));
-                count++;
-            })
+            if (obj.length === 0) {
+                console.log(chalk.green("Sorry, there are no upcoming shows for " + artist + " :-(\n"));
+            } else {
+                obj.forEach(function (event) {
+                    if (bitCount <= 3) {
+                        console.log(chalk.green("Result #" + count));
+                        console.log(chalk.green("Venue Name: " + event.venue.name));
+                        console.log(chalk.green("Venue Location: " + event.venue.city + "," + event.venue.country));
+                        console.log(chalk.green("Show Date: " + event.datetime + "\n"));
+                        count++;
+                    }
+                    bitCount++;
+                })
+            }
 
 
         })
@@ -147,22 +159,23 @@ function getBIT() {
 
 
 function getSpotify() {
-    var song = "Ace of Base";
+    var song = "Enjoy the Silence";
+
     if (keyword) {
         song = keyword;
+        console.log(chalk.magenta("Spotify results for " + song + "."));
+    } else {
+        console.log(chalk.magenta("You didn't enter a song, so here are Spotify results for 'Enjoy the Silence'."));
     }
-    console.log(keyword);
 
     spotify.search({ type: 'track', query: song })
         .then(function (response) {
-            //   console.log(response.tracks);
-            // console.log(response.tracks.items);
             var obj = response.tracks.items;
             count = 0;
             spotifyCount = 1;
 
             obj.forEach(function (result) {
-                if (spotifyCount <= 5) {
+                if (spotifyCount <= 3) {
                     console.log(chalk.magenta("Result #" + spotifyCount));
                     console.log(chalk.magenta("Artist Name: " + (result.artists[0].name)));
                     console.log(chalk.magenta("Song: " + (result.name)));
@@ -178,21 +191,45 @@ function getSpotify() {
         });
 }
 
+function doThis() {
+    // The code will store the contents of the reading inside the variable "data"
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        // If the code experiences any errors it will log the error to the console.
+        if (error) {
+            return console.log(error);
+        }
 
+        // We will then print the contents of data
+        console.log(data);
 
-switch (action) {
-    case "concert-this":
-        getBIT();
-        break;
-    case "spotify-this-song":
-        getSpotify();
-        break;
-    case "movie-this":
-        getOMDB();
-        break;
-    case "do-what-it-says":
-        getOMDB();
-        break;
-    default:
-        console.log("Sorry, that's not a LIRI command. Please select: movie-this, spotify-this-song, do-what-it-says or concert-this followed by a keyword.");
+        // Then split it by commas (to make it more readable)
+        var dataArr = data.split(",");
+
+        // We will then re-display the content as an array for later use.
+        console.log(dataArr);
+
+        action = dataArr[0];
+        keyword = dataArr[1];
+
+        runSwitch();
+    });
+}
+
+function runSwitch() {
+    switch (action) {
+        case "concert-this":
+            getBIT();
+            break;
+        case "spotify-this-song":
+            getSpotify();
+            break;
+        case "movie-this":
+            getOMDB();
+            break;
+        case "do-what-it-says":
+            doThis();
+            break;
+        default:
+            console.log("Sorry, that's not a LIRI command. Please select: movie-this, spotify-this-song, do-what-it-says or concert-this followed by a keyword.");
+    }
 }
