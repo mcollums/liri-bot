@@ -1,6 +1,7 @@
 # LIRI-bot
 
 Much like queen Siri, Liri is a bot that helps you search for random tidbits of knowledge. Liri can search for movies, songs, concerts and has an option to do whatever she wants. In order to get the most out of Liri, please read on.
+Live Link: https://mcollums.github.io/liri-bot/
 
 ## Getting Started
 
@@ -64,7 +65,7 @@ node liri.js do-what-it-says
 ```
 
 
-Please follow this link for a preview of the app.
+[Please follow this link for a preview of the app.](https://youtu.be/9-IEOJb5NYQ)
 
 
 ## Built With
